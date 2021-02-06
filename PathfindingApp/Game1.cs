@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using PathfindingApp.Managers;
+using PathfindingApp.Settings;
 
 namespace PathfindingApp
 {
@@ -12,15 +14,24 @@ namespace PathfindingApp
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        private AppManager _manager;
+        private RenderTarget2D _gameTarget;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            IsMouseVisible = true;
+            IsMouseVisible = false;
+
+
         }
 
         protected override void Initialize()
         {
+            _graphics.PreferredBackBufferWidth = ScreenSettings.WindowWidth;
+            _graphics.PreferredBackBufferHeight = ScreenSettings.WindowHeight;
+            _graphics.ApplyChanges();
+
             base.Initialize();
         }
 
@@ -28,6 +39,11 @@ namespace PathfindingApp
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            _manager = new AppManager(GraphicsDevice, _spriteBatch);
+            _manager.LoadContent(Content);
+            _manager.DrawMapTarget();
+
+            _gameTarget = new RenderTarget2D(GraphicsDevice, ScreenSettings.GameWidth, ScreenSettings.GameHeight);
         }
 
         protected override void Update(GameTime gameTime)
@@ -35,14 +51,44 @@ namespace PathfindingApp
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            _manager.Update(gameTime);
+
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.WhiteSmoke);
+
+            DrawToTarget();
+
+            _spriteBatch.Begin(
+                SpriteSortMode.Deferred,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp);
+            _spriteBatch.Draw(_gameTarget, ScreenSettings.WindowRect, Color.White);
+            _spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private void DrawToTarget()
+        {
+            GraphicsDevice.SetRenderTarget(_gameTarget);
+            GraphicsDevice.Clear(Color.Transparent);
+
+            _spriteBatch.Begin(
+                SpriteSortMode.Immediate, 
+                BlendState.AlphaBlend, 
+                SamplerState.PointClamp, 
+                null, 
+                null);
+
+            _manager.Draw(_spriteBatch);
+
+            _spriteBatch.End();
+
+            GraphicsDevice.SetRenderTarget(null);
         }
     }
 }
