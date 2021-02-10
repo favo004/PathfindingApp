@@ -1,13 +1,37 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
 
 namespace PathfindingApp.Sprites
 {
+    public enum CellType
+    {
+        Wall,
+        Floor
+    }
     public class Cell : Sprite
     {
         public bool Highlighted;
-        public Color HighlightColor;
+
+        public List<Color> HighlightedColors;
+        public Color HighlightedColor
+        {
+            get
+            {
+                Color highlight = Color.White;
+
+                foreach (Color color in HighlightedColors)
+                {
+                    highlight = new Color((highlight.R + color.R) / 2, (highlight.G + color.B)/2, (highlight.B + color.B) / 2);
+                }
+
+                return highlight;
+            }
+        }
+
+        public CellType CellType;
 
         private readonly string _textureKey;
         private readonly Vector2 _mapPosition;
@@ -15,6 +39,10 @@ namespace PathfindingApp.Sprites
         private Effect flashEffect;
         private Effect outlineEffect;
 
+        public Cell()
+        {
+
+        }
         /// <summary>
         /// Sprite that represents map graphics
         /// </summary>
@@ -31,29 +59,43 @@ namespace PathfindingApp.Sprites
 
         public override void LoadContent(ContentManager content)
         {
-            _texture = content.Load<Texture2D>("Graphics/Assets");
+            Texture = content.Load<Texture2D>("Graphics/Assets");
 
             switch (_textureKey)
             {
                 case "wall":
-                    _sourceRect = new Rectangle(16, 0, 16, 16);
+                    SourceRect = new Rectangle(16, 0, 16, 16);
+                    CellType = CellType.Wall;
                     break;
                 case "floor":
-                    _sourceRect = new Rectangle(0, 16, 16, 16);
+                    SourceRect = new Rectangle(0, 16, 16, 16);
+                    CellType = CellType.Floor;
                     break;
                 default:
-                    _sourceRect = new Rectangle(0, 16, 16, 16);
+                    SourceRect = new Rectangle(0, 16, 16, 16);
+                    CellType = CellType.Floor;
                     break;
             }
             flashEffect = content.Load<Effect>("Shaders/FlashToWhite");
             outlineEffect = content.Load<Effect>("Shaders/Outline");
-            outlineEffect.Parameters["texelSize"].SetValue(new Vector2(1f / (_sourceRect.Width - 1f), 1f / (_sourceRect.Height - 1f)));
+            outlineEffect.Parameters["texelSize"].SetValue(new Vector2(1f / (SourceRect.Width - 1f), 1f / (SourceRect.Height - 1f)));
             outlineEffect.Parameters["outlineColor"].SetValue(new Vector4(1.0f, 1.0f, 1.0f, 1.0f));
 
-            _origin = new Vector2(_sourceRect.Width / 2, _sourceRect.Height / 2);
-            Bounds = new Rectangle(_position.ToPoint() + _mapPosition.ToPoint(), new Point(_sourceRect.Width, _sourceRect.Height));
+            Origin = new Vector2(SourceRect.Width / 2, SourceRect.Height / 2);
+            Bounds = new Rectangle(Position.ToPoint() + _mapPosition.ToPoint(), new Point(SourceRect.Width, SourceRect.Height));
         }
 
+        public override object Copy()
+        {
+            Cell cell = new Cell(Position, _mapPosition, _textureKey);
+            cell.SetAttributes(Texture, SourceRect, Scale, Rotation, Color, Bounds, CellType);
+            return cell;
+        }
+        public void SetAttributes(Texture2D texture, Rectangle sourceRect, Vector2 scale, float rotation, Color color, Rectangle bounds, CellType cellType)
+        {
+            base.SetAttributes(texture, sourceRect, scale, rotation, color, bounds);
+            CellType = cellType;
+        }
         /// <summary>
         /// Highlights cell
         /// </summary>
@@ -63,8 +105,7 @@ namespace PathfindingApp.Sprites
             if (!Highlighted)
             {
                 Highlighted = true;
-                //_color = Color.Yellow;
-                _effect = flashEffect;
+                Color = Color.Yellow;
             }
         }
         public void UnHighlight()
@@ -72,8 +113,21 @@ namespace PathfindingApp.Sprites
             if (Highlighted)
             {
                 Highlighted = false;
-                //_color = Color.White;
-                _effect = null;
+                Color = Color.White;
+            }
+        }
+
+        public void ChangeCellType(CellType type)
+        {
+            CellType = type;
+            switch (type)
+            {
+                case CellType.Floor:
+                    SourceRect = new Rectangle(0, 16, 16, 16);
+                    break;
+                case CellType.Wall:
+                    SourceRect = new Rectangle(16, 0, 16, 16);
+                    break;
             }
         }
     }

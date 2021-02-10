@@ -57,6 +57,6 @@ technique OutlineEffect
 {
     pass P0
     {
-        PixelShader = compile PS_SHADERMODEL MainPS();
+        PixelShader = compile ps_3_0 MainPS();
     }
 };

@@ -11,6 +11,10 @@ namespace PathfindingApp
     /// </summary>
     public class Game1 : Game
     {
+        public static Texture2D SquareTexture;
+
+        public static float GameSpeed = 1f; // Adjust this for when we want to see up pathfinding visuals
+
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
@@ -22,8 +26,6 @@ namespace PathfindingApp
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = false;
-
-
         }
 
         protected override void Initialize()
@@ -38,6 +40,12 @@ namespace PathfindingApp
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            // Create pixel texture
+            SquareTexture = new Texture2D(GraphicsDevice, 1, 1);
+            Color[] data = new Color[1];
+            data[0] = Color.White;
+            SquareTexture.SetData(data);
 
             _manager = new AppManager(GraphicsDevice, _spriteBatch);
             _manager.LoadContent(Content);
@@ -75,7 +83,7 @@ namespace PathfindingApp
         private void DrawToTarget()
         {
             GraphicsDevice.SetRenderTarget(_gameTarget);
-            GraphicsDevice.Clear(Color.Transparent);
+            GraphicsDevice.Clear(Color.DarkSlateGray);
 
             _spriteBatch.Begin(
                 SpriteSortMode.Immediate, 

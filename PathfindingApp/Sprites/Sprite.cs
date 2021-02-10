@@ -16,32 +16,44 @@ namespace PathfindingApp.Sprites
         /// Matrix coordinates of sprite
         /// Used if sprite is within the map
         /// </summary>
-        public Point Coordinates { get; set; }
+        public virtual Point Coordinates { get; set; }
         /// <summary>
         /// The area that the sprite consumes
         /// </summary>
-        public virtual Rectangle Bounds { get; protected set; }
+        public virtual Rectangle Bounds { get; set; }
 
-        protected Texture2D _texture;
-        protected Rectangle _sourceRect;
-        protected Vector2 _position;
-        protected Vector2 _origin;
-        protected Vector2 _scale;
-        protected float _rotation;
-        protected Color _color;
+        public Texture2D Texture { get; protected set; }
+        public Rectangle SourceRect { get; protected set; }
+        public Vector2 Position { get; set; }
+        public Vector2 Origin { get; protected set; }
+        public Vector2 Scale { get; protected set; }
+        public float Rotation { get; protected set; }
+        private Color _color;
+        public Color Color
+        {
+            get
+            {
+                return _color * Alpha;
+            }
+            set
+            {
+                _color = value;
+            }
+        }
+        public float Alpha { get; set; }
         protected Effect _effect;
 
         public Sprite()
         {
-
+            Scale = Vector2.One;
+            Rotation = 0f;
+            Color = Color.White;
+            Alpha = 1f;
         }
         public Sprite(Vector2 position)
+            : this()
         {
-            _position = position;
-
-            _scale = Vector2.One;
-            _rotation = 0f;
-            _color = Color.White;
+            Position = position;
         }
 
         /// <summary>
@@ -49,6 +61,10 @@ namespace PathfindingApp.Sprites
         /// </summary>
         /// <param name="content"></param>
         public virtual void LoadContent(ContentManager content)
+        {
+
+        }
+        public virtual void LoadContent(ContentManager content, GraphicsDevice graphics, SpriteBatch spriteBatch)
         {
 
         }
@@ -68,7 +84,7 @@ namespace PathfindingApp.Sprites
         public virtual void Draw(SpriteBatch spriteBatch)
         {
             // Add origin to position to draw sprite to center point
-            Vector2 centeredPosition = _position + _origin;
+            Vector2 centeredPosition = Position + Origin;
 
             if (_effect != null)
             {
@@ -81,9 +97,45 @@ namespace PathfindingApp.Sprites
                 _effect);
             }
 
-            spriteBatch.Draw(_texture, centeredPosition, _sourceRect, _color, _rotation, _origin, _scale, SpriteEffects.None, .5f);
-            
-            if(_effect != null)
+            spriteBatch.Draw(Texture, centeredPosition, SourceRect, Color, Rotation, Origin, Scale, SpriteEffects.None, .5f);
+
+
+            if (_effect != null)
+            {
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Immediate,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp,
+                null,
+                null);
+            }
+        }
+        public virtual void Draw(SpriteBatch spriteBatch, RenderTarget2D target = null)
+        {
+            // Add origin to position to draw sprite to center point
+            Vector2 centeredPosition = Position + Origin;
+
+            if (_effect != null)
+            {
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Deferred,
+                BlendState.AlphaBlend,
+                SamplerState.PointClamp,
+                null,
+                null,
+                _effect);
+            }
+
+            if (target == null)
+            {
+                spriteBatch.Draw(Texture, centeredPosition, SourceRect, Color, Rotation, Origin, Scale, SpriteEffects.None, .5f);
+            }
+            else
+            {
+                spriteBatch.Draw(target, centeredPosition, SourceRect, Color, Rotation, Origin, Scale, SpriteEffects.None, .5f);
+            }
+
+            if (_effect != null)
             {
                 spriteBatch.End();
                 spriteBatch.Begin(SpriteSortMode.Immediate,
@@ -95,11 +147,32 @@ namespace PathfindingApp.Sprites
         }
 
         /// <summary>
+        /// Returns a copy of sprite
+        /// </summary>
+        /// <returns></returns>
+        public virtual object Copy()
+        {
+            Sprite copy = new Sprite(Position);
+            copy.SetAttributes(Texture, SourceRect, Scale, Rotation, Color, Bounds);
+            return copy;
+        }
+        public virtual void SetAttributes(Texture2D texture, Rectangle sourceRect, Vector2 scale, float rotation, Color color, Rectangle bounds)
+        {
+            Texture = texture;
+            SourceRect = sourceRect;
+            Origin = new Vector2(sourceRect.Width / 2, sourceRect.Height / 2);
+            Scale = scale;
+            Rotation = rotation;
+            Color = color;
+            Bounds = bounds;
+        }
+
+        /// <summary>
         /// Updates the bounds of the sprite based on position
         /// </summary>
         private void UpdateBounds()
         { 
-            Bounds = new Rectangle(_position.ToPoint(), new Point(_sourceRect.Width, _sourceRect.Height));
+            Bounds = new Rectangle(Position.ToPoint(), new Point(SourceRect.Width, SourceRect.Height));
         }
     }
 }

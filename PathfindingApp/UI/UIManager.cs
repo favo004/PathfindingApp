@@ -6,62 +6,59 @@ using System.Collections.Generic;
 
 namespace PathfindingApp.UI
 {
+    /// <summary>
+    /// Manages all UI elements
+    /// </summary>
     public class UIManager
     {
         private Cursor _cursor;
+        private Map _map;
+        private GraphicsDevice _graphics;
+        private SpriteBatch _spriteBatch;
 
-        private Button _btn1;
-        private Button _btn2;
-        private Button _btn3;
+        private MapMenu _mapMenu;
+        private MapCustomizeMenu _customizeMenu;
 
-        private List<Button> _btns;
+        private bool _mapRunning;
 
-        public UIManager(Cursor cursor)
+        public UIManager(Cursor cursor, GraphicsDevice graphics, SpriteBatch spriteBatch, Map map)
         {
             _cursor = cursor;
+            _map = map;
+            _graphics = graphics;
+            _spriteBatch = spriteBatch;
 
-            _btns = new List<Button>();
-            _btn1 = new Button("Testing", new Vector2(80, 100), ButtonType.Normal);
-            _btn2 = new Button("Testing", new Vector2(80, 150), ButtonType.Normal);
-            _btn3 = new Button("Testing", new Vector2(80, 200), ButtonType.Normal);
-            _btns.Add(_btn1);
-            _btns.Add(_btn2);
-            _btns.Add(_btn3);
+            _mapMenu = new MapMenu(graphics, spriteBatch, cursor, map);
+            _customizeMenu = new MapCustomizeMenu(graphics, spriteBatch, cursor, map);
         }
 
         public void LoadContent(ContentManager content)
         {
-            foreach (Button button in _btns)
-            {
-                button.LoadContent(content);
-            }
+            _mapMenu.LoadContent(content);
+            _customizeMenu.LoadContent(content);
         }
 
         public void Update(GameTime gameTime)
         {
-            foreach (Button button in _btns)
-            {
-                if (button.Bounds.Intersects(_cursor.ClickBounds))
-                {
-                    button.Highlight();
-                }
-                else
-                {
-                    if (button.Highlighted)
-                        button.UnHighlight();
-                }
-
-                button.Update(gameTime);
-
-            }
+            _mapMenu.Update(gameTime);
+            _customizeMenu.Update(gameTime);
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            foreach (Button button in _btns)
+            _mapMenu.Draw(spriteBatch);
+            _customizeMenu.Draw(spriteBatch);
+        }
+
+        private bool CheckMapRunning()
+        {
+            if(_map.Running && !_mapRunning)
             {
-                button.Draw(spriteBatch);
+                _mapRunning = true;
+                _customizeMenu.DisableButtons();
             }
+
+            return false;
         }
     }
 }

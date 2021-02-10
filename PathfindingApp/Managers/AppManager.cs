@@ -28,8 +28,8 @@ namespace PathfindingApp.Managers
             _spriteBatch = spriteBatch;
 
             _cursor = new Cursor();
-            _map = new Map(_config.MapPath, _cursor, _graphics);
-            _uIManager = new UIManager(_cursor);
+            _map = new Map(_config.MapPath, _cursor, _graphics, _spriteBatch);
+            _uIManager = new UIManager(_cursor, graphics, spriteBatch, _map);
         }
 
         /// <summary>
