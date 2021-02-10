@@ -34,6 +34,11 @@ namespace PathfindingApp.UI
         {
             base.Draw(spriteBatch);
         }
+        public override void DrawMessage(SpriteBatch spriteBatch)
+        {
+            if (!Toggled)
+                base.DrawMessage(spriteBatch);
+        }
 
         public override void OnClick()
         {

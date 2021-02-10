@@ -88,7 +88,7 @@ namespace PathfindingApp.UI
             if(_font != null && _text != null)
                 spriteBatch.DrawString(_font, _text, _textPosition, Color.Black);
         }
-        public void DrawMessage(SpriteBatch spriteBatch)
+        public virtual void DrawMessage(SpriteBatch spriteBatch)
         {
             if (_showMessage)
             {

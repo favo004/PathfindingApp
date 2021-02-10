@@ -116,13 +116,7 @@ namespace PathfindingApp.Sprites
         }
         public override void Draw(SpriteBatch spriteBatch)
         {
-            base.Draw(spriteBatch);
-
-            if (_statsDrawn)
-            {
-                if (ShowStats)
-                    spriteBatch.Draw(_statsTarget, _statsPosition, Color.White);
-            }
+            base.Draw(spriteBatch);       
         }
         public void DrawPath(SpriteBatch spriteBatch)
         {
@@ -130,7 +124,15 @@ namespace PathfindingApp.Sprites
                 _searchPath.Draw(spriteBatch);
             
         }
-        public void DrawStats(GraphicsDevice graphics, SpriteBatch spriteBatch, Map map)
+        public void DrawStats(SpriteBatch spriteBatch)
+        {
+            if (_statsDrawn)
+            {
+                if (ShowStats)
+                    spriteBatch.Draw(_statsTarget, _statsPosition, Color.White);
+            }
+        }
+        public void DrawStatsToTarget(GraphicsDevice graphics, SpriteBatch spriteBatch, Map map)
         {
             if (_statsDrawn) return;
 
@@ -141,7 +143,7 @@ namespace PathfindingApp.Sprites
             spriteBatch.Draw(Game1.SquareTexture, _statsTarget.Bounds, Color.Black * .7f);
             spriteBatch.DrawString(_font, GetAlgorithmType(), new Vector2(5, 5), Color.White);
             spriteBatch.DrawString(_font, "Cells Searched: " + SearchCells.Count, new Vector2(5, 20), Color.White);
-            spriteBatch.DrawString(_font, "Search time: " + _elapsedRunTime.ToString("n2"), new Vector2(5, 35), Color.White);
+            spriteBatch.DrawString(_font, "Search time: " + _elapsedRunTime.ToString("n2") + "s", new Vector2(5, 35), Color.White);
 
             spriteBatch.End();
 
@@ -202,7 +204,9 @@ namespace PathfindingApp.Sprites
         {
             Running = false;
             HasRunAlgorithms = false;
-            _algorithmsFinished = false;
+            if(_searchPath != null)
+                _searchPath.Clear();
+            
             _elapsedRunTime = 0f;
 
             StatsNeedUpdate = false;
@@ -310,6 +314,12 @@ namespace PathfindingApp.Sprites
                     block.Draw(spriteBatch);
                 }
             }
+        }
+
+        public void Clear()
+        {
+            _searchBlocks.Clear();
+            _pathBlocks.Clear();
         }
 
         private void AddNextBlock()

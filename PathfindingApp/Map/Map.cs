@@ -141,6 +141,12 @@ namespace PathfindingApp
             if(Goal != null)
                 Goal.Draw(spriteBatch);
 
+            foreach (Pursuer pursuer in Pursuers)
+            {
+                if (pursuer.ShowStats)
+                    pursuer.DrawStats(spriteBatch);
+            }
+
             spriteBatch.End();
 
             _graphics.SetRenderTarget(null);
@@ -203,6 +209,7 @@ namespace PathfindingApp
             {
                 pursuer.Reset();
             }
+            NeedsUpdate = true;
         }
 
         /// <summary>
@@ -483,7 +490,7 @@ namespace PathfindingApp
             {
                 if (pursuer.StatsNeedUpdate)
                 {
-                    pursuer.DrawStats(_graphics, _spriteBatch, this);
+                    pursuer.DrawStatsToTarget(_graphics, _spriteBatch, this);
                 }
             }
         }
