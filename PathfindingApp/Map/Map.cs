@@ -36,6 +36,10 @@ namespace PathfindingApp
 
         private const int MAX_PURSUERS = 4;
 
+        public Map(string filePath)
+        {
+            GenerateMapFromFile(filePath);
+        }
         public Map(string filePath, Cursor cursor, GraphicsDevice graphics, SpriteBatch spriteBatch)
         {
             _graphics = graphics;
@@ -327,7 +331,8 @@ namespace PathfindingApp
         }
         public bool IsCellAWall(Point coords)
         {
-            return _mapCells[coords.Y][coords.X].CellType == CellType.Wall;
+            return MapKeys[coords.Y][coords.X] == '*';
+            //return _mapCells[coords.Y][coords.X].CellType == CellType.Wall;
         }
         /// <summary>
         /// Checks to see if cursor is hovering over map
@@ -402,6 +407,12 @@ namespace PathfindingApp
                         Cell tmp = (Cell)_cursor.HeldItem.Copy();
                         SetNewCellParams(tmp, cell);
                         _mapCells[cell.Coordinates.Y][cell.Coordinates.X] = tmp;
+
+                        if (tmp.CellType == CellType.Floor) 
+                            MapKeys[cell.Coordinates.Y][cell.Coordinates.X] = '.';
+                        else 
+                            MapKeys[cell.Coordinates.Y][cell.Coordinates.X] = '*';
+
                         NeedsUpdate = true;
                     }
                     else if(_cursor.HeldItem.GetType() == typeof(Goal))
@@ -425,6 +436,7 @@ namespace PathfindingApp
                         if (cell.CellType == CellType.Wall)
                         {
                             cell.ChangeCellType(CellType.Floor);
+                            MapKeys[cell.Coordinates.Y][cell.Coordinates.X] = '.';
                             NeedsUpdate = true;
                             return;
                         }
@@ -533,7 +545,8 @@ namespace PathfindingApp
             int height = MapKeys.Length * 16;
             int width = MapKeys[0].Length * 16;
 
-            MapTarget = new RenderTarget2D(_graphics, width, height);
+            if(_graphics != null)
+                MapTarget = new RenderTarget2D(_graphics, width, height);
         }
         /// <summary>
         /// Sets maps graphical data from key data
@@ -544,8 +557,11 @@ namespace PathfindingApp
             {
                 for (int j = 1; j < MapKeys[i].Length-1; j++)
                 {
-                    if(_mapCells[i][j].CellType == CellType.Wall)
+                    if (_mapCells[i][j].CellType == CellType.Wall)
+                    {
                         _mapCells[i][j].ChangeCellType(CellType.Floor);
+                        MapKeys[i][j] = '.';
+                    }
                 }
             }
         }
