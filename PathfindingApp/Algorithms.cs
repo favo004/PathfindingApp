@@ -127,7 +127,8 @@ namespace PathfindingApp
             while(pq.Count != 0)
             {
                 Point current = pq.Dequeue();
-                movedTo.Add(current);
+                if(movedTo != null)
+                    movedTo.Add(current);
 
                 if(current == goal)
                 {
