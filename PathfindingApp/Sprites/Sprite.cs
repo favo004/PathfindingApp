@@ -103,7 +103,7 @@ namespace PathfindingApp.Sprites
             if (_effect != null)
             {
                 spriteBatch.End();
-                spriteBatch.Begin(SpriteSortMode.Immediate,
+                spriteBatch.Begin(SpriteSortMode.Deferred,
                 BlendState.AlphaBlend,
                 SamplerState.PointClamp,
                 null,
